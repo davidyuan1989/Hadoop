@@ -9,6 +9,11 @@
 package Utility;
 
 import java.io.Serializable;
+import java.util.List;
+
+import MapRed.Job.JobContext;
+import MapRed.Map.MapBasicContext;
+import MapRed.Reduce.ReduceBasicContext;
 
 public class Message implements Serializable {
 
@@ -25,10 +30,17 @@ public class Message implements Serializable {
 	
 	private long datanodeSpaceUsed;
 	private String nodeID;
+	
+	private int taskTrackerID;
+	private JobContext jobContext;
+	private List<MapBasicContext> mapContexts;
+	private List<ReduceBasicContext> reduceContexts;
+	
+	private String jobID;
 
 	public Message(int type) {
 
-		if (type == Utility.ACK) {
+		if (type == Utility.ACK || type == Utility.TASKTRACKERREG || type == Utility.NEWJOBACK) {
 			this.type = type;
 		}
 
@@ -37,11 +49,53 @@ public class Message implements Serializable {
 		}
 	}
 
-	public Message(int type, String fileName) {
+	public Message(int type, String string) {
 
 		if (type == Utility.READFILE || type == Utility.CLOSEFILE || type == Utility.WRITEFILE) {
 			this.type = type;
-			this.fileName = fileName;
+			this.fileName = string;
+		}
+
+		else {
+			System.out.println("Message type and arguments do not match! Message requested: " + type);
+		}
+	}
+	
+	public Message(int type, int taskTrackerID) {
+
+		if (type == Utility.REGACK) {
+			this.type = type;
+			this.taskTrackerID = taskTrackerID;
+		}
+
+		else {
+			System.out.println("Message type and arguments do not match! Message requested: " + type);
+		}
+	}
+	
+	public Message(int type, JobContext jobContext) {
+
+		if (type == Utility.NEWJOB) {
+			this.type = type;
+			this.jobContext = jobContext;
+		}
+
+		else {
+			System.out.println("Message type and arguments do not match! Message requested: " + type);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Message(int type, List<?> contexts) {
+
+		if (type == Utility.RUNMAPPER) {
+			this.type = type;
+			this.mapContexts = (List<MapBasicContext>) contexts;
+		}
+		
+		else if (type == Utility.RUNREDUCER) {
+			this.type = type;
+			this.reduceContexts = (List<ReduceBasicContext>) contexts;
 		}
 
 		else {
@@ -61,6 +115,19 @@ public class Message implements Serializable {
 		}
 	}
 
+	public Message(int type, int taskTrackerID, String jobID) {
+
+		if (type == Utility.MAPPERDONE || type == Utility.REDUCERDONE) {
+			this.type = type;
+			this.taskTrackerID = taskTrackerID;
+			this.jobID = jobID;
+		}
+
+		else {
+			System.out.println("Message type and arguments do not match! Message requested: " + type);
+		}
+	}
+	
 	public Message(int type, byte[] data, int size) {
 
 		if (type == Utility.DATAREAD) {
@@ -127,5 +194,25 @@ public class Message implements Serializable {
 	
 	public String getNodeID() {
 		return nodeID;
+	}
+	
+	public int getTaskTrackerID() {
+		return taskTrackerID;
+	}
+	
+	public JobContext getJobContext() {
+		return jobContext;
+	}
+	
+	public List<MapBasicContext> getMapContexts() {
+		return mapContexts;
+	}
+	
+	public List<ReduceBasicContext> getReduceContexts() {
+		return reduceContexts;
+	}
+	
+	public String getJobID() {
+		return jobID;
 	}
 }

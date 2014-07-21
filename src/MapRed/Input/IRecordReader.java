@@ -12,7 +12,6 @@ public interface IRecordReader<K, V> {
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */
-	@SuppressWarnings("rawtypes")
 	public void initialize(IInputSplit split,
 			TaskContext context
 			) throws IOException, InterruptedException;

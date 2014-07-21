@@ -8,14 +8,17 @@ import MapRed.Input.IInputSplit;
 import MapRed.Input.IRecordReader;
 import MapRed.Output.IRecordWriter;
 import MapRed.Output.OutputCommitter;
-import MapRed.Task.TaskContext;
 import MapRed.Task.TaskID;
 
 public class MapContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends 
-				TaskContext<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+				MapBasicContext {
 
-	private IRecordReader<KEYIN,VALUEIN> reader;
-	private IInputSplit split;
+	private static final long serialVersionUID = 1L;
+	
+	public IRecordWriter<KEYOUT,VALUEOUT> writer;
+	public IStatusReporter reporter;
+	public OutputCommitter committer;
+	public IRecordReader<KEYIN,VALUEIN> reader;
 
 	public MapContext(Configuration conf, TaskID taskid,
 			IRecordReader<KEYIN,VALUEIN> reader,
@@ -23,27 +26,42 @@ public class MapContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT> extends
 			OutputCommitter committer,
 			IStatusReporter reporter,
 			IInputSplit split) {
-		super(conf, taskid, writer, committer, reporter);
+		super(conf, taskid, split);
+		this.writer = writer;
 		this.reader = reader;
-		this.split = split;
+		this.committer = committer;
+		this.reporter = reporter;
 	}
 
-	public IInputSplit getInputSplit() {
-		return split;
-	}
-
-	@Override
 	public KEYIN getCurrentKey() throws IOException, InterruptedException {
 		return reader.getCurrentKey();
 	}
 
-	@Override
 	public VALUEIN getCurrentValue() throws IOException, InterruptedException {
 		return reader.getCurrentValue();
 	}
 
-	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException {
 		return reader.nextKeyValue();
+	}
+	
+	public void write(KEYOUT key, VALUEOUT value
+			) throws IOException, InterruptedException {
+		writer.write(key, value);
+	}
+	
+	public void close() {
+		try {
+			if (reader != null) {
+				reader.close();
+			}
+			if (writer != null) {
+				writer.close(null);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 }

@@ -1,7 +1,10 @@
 package MapRed.Job;
 
-public class JobID {
+import java.io.Serializable;
 
+public class JobID implements Serializable{
+
+	private static final long serialVersionUID = 2L;
 	private static final String SEPARATOR = "_";
 	private int jobTrackerID;
 	private int jobID;

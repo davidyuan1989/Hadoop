@@ -20,11 +20,12 @@ public class Utility {
 			
 			DATANODES = new ArrayList<Machine>();
 			Machine machine1 = new Machine(InetAddress.getByName("127.0.0.1"), 33160);
-			Machine machine2 = new Machine(InetAddress.getByName("127.0.0.1"), 33170);
+			//Machine machine2 = new Machine(InetAddress.getByName("127.0.0.1"), 33170);
 			DATANODES.add(machine1);
-			DATANODES.add(machine2);
+			//DATANODES.add(machine2);
 			
-			JZFSroot = "JZFS/";
+			JOBTRACKER = NAMENODE;
+			TASKTRACKERS = DATANODES;
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -40,12 +41,32 @@ public class Utility {
 	public static final int ACK = 999;	
 	public static final int CLOSE = 1000;
 	
-	/* Configuration Constants */
+	public static final int TASKTRACKERREG = 100;
+	public static final int REGACK = 101;
+	public static final int NEWJOB = 102;
+	public static final int NEWJOBACK = 103;
+	public static final int RUNMAPPER = 104;
+	public static final int MAPPERDONE = 105;
+	public static final int RUNREDUCER = 106;
+	public static final int REDUCERDONE = 107;
+	public static final int TASKTRACKERHEARTBEAT = 200;
+	
+	/* User defined configuration constants */
 	public static Machine NAMENODE;
 	public static List<Machine> DATANODES;
-	public static String JZFSroot = "JZFS/";
-	public static String LocalFSroot = "Local/";
-	public static String LocalFStemp = "Local/Temp/";
+	public static Machine JOBTRACKER;
+	public static List<Machine> TASKTRACKERS;
+	public static int JobTrackerPort = 33150;
+	public static int TaskTrackerPort = 33160;
+	
+	/* Read only configuration constants */
+	public static final String JZFSroot = "JZFS/";
+	public static final String JZFStemp = "JZFS/Temp/";
+	public static final String LocalFSroot = "Local/";
+	public static final String LocalFStemp = "Local/Temp/";
+	public static final String MapperOutputNameBase = LocalFStemp + "Mapper";
+	public static final String PartitionOutputNameBase = LocalFStemp + "Partition";
+	public static final String MiddleOutputFileSuffix = ".dat";
 	
 	/* Error message types */
 	public static final int NOSUCHFILE = 1;

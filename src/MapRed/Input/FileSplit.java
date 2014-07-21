@@ -1,11 +1,14 @@
 package MapRed.Input;
 
 import java.io.IOException;
+import java.io.Serializable;
 
 import Utility.JZFile;
 
-public class FileSplit implements IInputSplit {
+public class FileSplit implements IInputSplit, Serializable {
 
+	private static final long serialVersionUID = 8L;
+	
 	private JZFile file;
 	private long start;
 	private long length;

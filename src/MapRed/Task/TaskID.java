@@ -1,8 +1,13 @@
 package MapRed.Task;
 
+import java.io.Serializable;
+
 import MapRed.Job.JobID;
 
-public class TaskID {
+public class TaskID implements Serializable {
+
+	private static final long serialVersionUID = 3L;
+
 	public static enum TaskType {MAPPER_T, COMBINER_T, REDUCER_T};
 	
 	private static final String SEPARATOR = "_";

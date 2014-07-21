@@ -6,14 +6,17 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.nio.file.NoSuchFileException;
 
 import JZFS.JZFSClient;
 import JZFS.JZFSFileInputStream;
 import JZFS.JZFSFileOutputStream;
 
-public class JZFile {
+public class JZFile implements Serializable {
 
+	private static final long serialVersionUID = 9L;
+	
 	public static final int JZFileSystem = 0;
 	public static final int LocalFileSystem = 1;
 

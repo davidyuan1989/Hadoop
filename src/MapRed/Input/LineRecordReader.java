@@ -9,6 +9,8 @@ import Utility.JZFile;
 
 public class LineRecordReader implements IRecordReader<Long, String>{
 
+	private final int carriageReturnLength = 2;
+	
 	private long start;				/* Start position of the file */
 	private long pos;				/* Current position in the file */
 	private long end;				/* The end position of the block to read */
@@ -16,7 +18,6 @@ public class LineRecordReader implements IRecordReader<Long, String>{
 	private long key;				/* Key of the record. Here it's the same as pos */
 	private String value;			/* Value of the record. Here it's the line of text */
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public void initialize(IInputSplit split, TaskContext context)
 			throws IOException, InterruptedException {
@@ -29,6 +30,16 @@ public class LineRecordReader implements IRecordReader<Long, String>{
 		JZFile file = fileSplit.getFile();
 		reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
 		reader.skip(pos);
+
+		/* Skip the first line */
+		if (pos != 0) {
+			String temp = reader.readLine();
+			int lengthRead = temp.length();
+			//test
+			//System.out.println("Skipped key value read: " + pos + " " + temp);
+			
+			pos += lengthRead + carriageReturnLength;
+		}
 	}
 
 	@Override
@@ -48,9 +59,12 @@ public class LineRecordReader implements IRecordReader<Long, String>{
 			}
 
 			lengthRead = value.length();
-			pos += lengthRead;
+			pos += lengthRead + carriageReturnLength;
 		}
 
+		//test
+		//System.out.println("Last key value read: " + key + " " + value);
+		
 		/* End of the block or end of file */
 		if (lengthRead == 0) {
 			return false;

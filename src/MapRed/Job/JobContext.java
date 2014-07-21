@@ -1,15 +1,21 @@
 package MapRed.Job;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import Conf.Configuration;
 import Utility.JZFile;
 
-public class JobContext {
+public class JobContext implements Serializable {
 
+	private static final long serialVersionUID = 1L;
+
+	public static enum JobStatus {INIT, MAPPING, REDUCING, FINISHED};
+	
 	protected final Configuration conf;
 	private final JobID jobID;
+	private JobStatus jobStatus = JobStatus.INIT;
 
 	public JobContext(Configuration conf, JobID jobID) {
 		this.conf = conf;
@@ -34,5 +40,13 @@ public class JobContext {
 
 	public List<JZFile> getInputFiles() {
 		return new ArrayList<JZFile>();
+	}
+	
+	public void setJobStatus(JobStatus status) {
+		jobStatus = status;
+	}
+	
+	public JobStatus getJobStatus() {
+		return jobStatus;
 	}
 }

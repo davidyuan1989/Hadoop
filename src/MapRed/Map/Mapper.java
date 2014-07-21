@@ -14,6 +14,9 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 
 	/* MapContext is a raw type class. This new context class specifies the types */
 	public class Context extends MapContext<KEYIN,VALUEIN,KEYOUT,VALUEOUT> {
+
+		private static final long serialVersionUID = 1L;
+
 		public Context(Configuration conf, TaskID taskid,
 				IRecordReader<KEYIN,VALUEIN> reader,
 				IRecordWriter<KEYOUT,VALUEOUT> writer,
@@ -39,7 +42,7 @@ public class Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
 	/* Called before the end of the task */
 	protected void cleanup(Context context
 			) throws IOException, InterruptedException {
-		// NOTHING
+		context.close();
 	}
 
 	public void run(Context context) throws IOException, InterruptedException {

@@ -1,36 +1,38 @@
 package MapRed.Output;
 
 import java.io.IOException;
+import java.util.Comparator;
 
 import MapRed.Task.TaskContext;
 import Utility.JZFile;
 import Utility.JZSequenceFile;
 
-public class SequenceFileRecordWriter<K, V> implements IRecordWriter<K, V>{
-	
+public class SequenceFileRecordSortedWriter<K, V> implements IRecordWriter<K, V>{
+
 	private JZSequenceFile file;
 	private JZSequenceFile.Writer<K, V> writer;
 
-	public SequenceFileRecordWriter(JZSequenceFile file) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public SequenceFileRecordSortedWriter(JZSequenceFile file, Comparator comparator, String id) {
 		this.file = file;
 		writer = new JZSequenceFile.Writer<K, V>(file);
+		writer.setup(comparator, id);
 	}
 	
 	@Override
 	public void write(K key, V value) throws IOException, InterruptedException {
-		writer.write(key, value);
+		writer.sortedWrite(key, value);
 	}
 
 	@Override
 	public void close(TaskContext context) throws IOException,
 			InterruptedException {
-		if (writer != null) {
-			writer.close();
-		}
+		writer.sortedClose();
 	}
 
 	@Override
 	public JZFile getOutputFile() {
 		return file;
 	}
+
 }
