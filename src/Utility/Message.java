@@ -11,6 +11,7 @@ package Utility;
 import java.io.Serializable;
 import java.util.List;
 
+import Conf.Configuration;
 import MapRed.Job.JobContext;
 import MapRed.Map.MapBasicContext;
 import MapRed.Reduce.ReduceBasicContext;
@@ -35,9 +36,17 @@ public class Message implements Serializable {
 	private JobContext jobContext;
 	private List<MapBasicContext> mapContexts;
 	private List<ReduceBasicContext> reduceContexts;
+	private Configuration conf;
 	
 	private String jobID;
 
+	public Message(int type, Configuration conf){
+		if (type == Utility.CONF) {
+			this.type = type;
+			this.conf = conf;
+		}
+	}
+	
 	public Message(int type) {
 
 		if (type == Utility.ACK || type == Utility.TASKTRACKERREG || type == Utility.NEWJOBACK) {
@@ -214,5 +223,9 @@ public class Message implements Serializable {
 	
 	public String getJobID() {
 		return jobID;
+	}
+	
+	public Configuration getConfiguration(){
+		return conf;
 	}
 }

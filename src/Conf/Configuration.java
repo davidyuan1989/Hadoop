@@ -23,6 +23,7 @@ public class Configuration implements Serializable {
 	private Class outputKeyClass = String.class;
 	private Class outputValueClass = String.class;
 	private int numReducers = 1;
+	private int numMapper = 4;
 	
 	private Comparator comparator = new StringComparator();
 	
@@ -153,5 +154,11 @@ public class Configuration implements Serializable {
 	 */
 	public void setNumReducers(int numReducers) {
 		this.numReducers = numReducers;
+	}
+	public int getNumMapper() {
+		return numMapper;
+	}
+	public void setNumMapper(int numMapper) {
+		this.numMapper = numMapper;
 	}
 }

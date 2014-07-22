@@ -50,6 +50,7 @@ public class Utility {
 	public static final int RUNREDUCER = 106;
 	public static final int REDUCERDONE = 107;
 	public static final int TASKTRACKERHEARTBEAT = 200;
+	public static final int CONF = 201;
 	
 	/* User defined configuration constants */
 	public static Machine NAMENODE;
@@ -67,6 +68,7 @@ public class Utility {
 	public static final String MapperOutputNameBase = LocalFStemp + "Mapper";
 	public static final String PartitionOutputNameBase = LocalFStemp + "Partition";
 	public static final String MiddleOutputFileSuffix = ".dat";
+	public static final String FILENAME = "JZFS/Input/input.txt";
 	
 	/* Error message types */
 	public static final int NOSUCHFILE = 1;
