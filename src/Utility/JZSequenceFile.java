@@ -50,6 +50,7 @@ public class JZSequenceFile extends JZFile {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
+				System.out.println("Corrupted key is " + key);
 				e.printStackTrace();
 			}
 			return false;
@@ -146,7 +147,7 @@ public class JZSequenceFile extends JZFile {
 					return comparator.compare((K) o1[0], (K) o2[0]);
 				}
 			};
-			buffer = new PriorityQueue<Object[]>(com);
+			buffer = new PriorityQueue<Object[]>(1, com);
 			
 			/* Initialize the files list */
 			files = new ArrayList<String>();
@@ -191,7 +192,7 @@ public class JZSequenceFile extends JZFile {
 					return 0;
 				}
 			};	
-			PriorityQueue<Object[]> keyQueue = new PriorityQueue<Object[]>(com);
+			PriorityQueue<Object[]> keyQueue = new PriorityQueue<Object[]>(1, com);
 			
 			/* Open all the sorted block files */
 			for (int i = 0; i < files.size(); i++) {
@@ -322,12 +323,12 @@ public class JZSequenceFile extends JZFile {
 				return tempComparator.compare(o1[0], o2[0]);
 			}
 		};	
-		PriorityQueue<Object[]> keyQueue = new PriorityQueue<Object[]>(com);
+		PriorityQueue<Object[]> keyQueue = new PriorityQueue<Object[]>(1, com);
 
 		/* Initialize the queue */
 		for (int i = 0; i < files.size(); i++) {
 			JZSequenceFile infile = 
-					new JZSequenceFile(JZFile.LocalFileSystem, files.get(i), 0, 0);
+					new JZSequenceFile(JZFile.JZFileSystem, files.get(i), 0, 0);
 			inFiles.add(infile);
 			JZSequenceFile.Reader<Object, List<Object>> reader = 
 					new JZSequenceFile.Reader<Object, List<Object>>(infile);

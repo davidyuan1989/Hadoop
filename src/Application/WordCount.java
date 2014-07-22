@@ -3,6 +3,8 @@ package Application;
 import java.io.IOException;
 import java.util.*;
 
+import Conf.Configuration;
+import MapRed.Job.JobClient;
 import MapRed.Map.Mapper;
 import MapRed.Reduce.Reducer;
 
@@ -35,22 +37,7 @@ public class WordCount {
 	}
 
 	public static void main(String[] args) throws Exception {
-		//Configuration conf = new Configuration();
-		/*
-     Configuration conf = new Configuration(WordCount.class);
-     conf.setJobName("wordcount");
-
-     conf.setOutputKeyClass(String.class);
-     conf.setOutputValueClass(String.class);
-
-     conf.setMapperClass(Map.class);
-     conf.setCombinerClass(Reduce.class);
-     conf.setReducerClass(Reduce.class);
-
-     conf.setInputFormat(TextInputFormat.class);
-     conf.setOutputFormat(TextOutputFormat.class);
-
-     //JobClient.runJob(context);
-		 */
+		Configuration conf = new Configuration();
+		JobClient.runJob(conf);
 	}
 }

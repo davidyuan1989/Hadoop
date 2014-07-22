@@ -23,13 +23,10 @@ public class NameNode extends JZFSNode {
 	public NameNode(InetAddress ipAddress, int port) {
 		super(ipAddress, port);
 		
-		/* For test */
-		DataNode dataNode1 = new DataNode(Utility.DATANODES.get(0).ipAddress, Utility.DATANODES.get(0).port);
-		DataNode dataNode2 = new DataNode(Utility.DATANODES.get(1).ipAddress, Utility.DATANODES.get(1).port);
-		dataNodes.put(dataNode1.id, dataNode1);
-		dataNodes.put(dataNode2.id, dataNode2);
-		//files.put("JZFS/input/input01.txt", dataNode1);
-		//files.put("JZFS/input/input02.txt", dataNode2);
+		for (int i = 0; i < Utility.DATANODES.size(); i++) {
+			DataNode dataNode = new DataNode(Utility.DATANODES.get(i).ipAddress, Utility.DATANODES.get(i).port);
+			dataNodes.put(dataNode.id, dataNode);
+		}
 	}
 
 	@Override

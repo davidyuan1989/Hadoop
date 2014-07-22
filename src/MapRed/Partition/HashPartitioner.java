@@ -33,7 +33,7 @@ public class HashPartitioner<K, V> implements IPartitioner<K, V>{
 				return tempComparator.compare((K) o1[0], (K) o2[0]);
 			}
 		};	
-		PriorityQueue<Object[]> keyQueue = new PriorityQueue<Object[]>(com);
+		PriorityQueue<Object[]> keyQueue = new PriorityQueue<Object[]>(1, com);
 
 		/* Initialize the queue */
 		for (int i = 0; i < inputFiles.size(); i++) {
@@ -57,7 +57,7 @@ public class HashPartitioner<K, V> implements IPartitioner<K, V>{
 		for (int i = 0; i < numPartitions; i++) {
 			String fileName = createPartitionFileName(jobTaskTrackerID, i);
 			JZSequenceFile file = 
-					new JZSequenceFile(JZFile.LocalFileSystem, fileName, 0, 0);
+					new JZSequenceFile(JZFile.JZFileSystem, fileName, 0, 0);
 			outFiles.add(file);
 			writers.add(new JZSequenceFile.Writer<K, List<V>>(file));
 		}

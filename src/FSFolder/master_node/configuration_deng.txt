@@ -1,0 +1,24 @@
+128.2.13.133       //IP address of NameNode in file system
+33050              //port number of NameNode in file system
+2                  //quantity of DataNode(s) in file system
+128.2.13.134       //IP address of DataNode in file system
+33060              //port number of DataNode in file system
+128.2.13.161       //IP address of DataNode in file system
+33060              //port number of DataNode in file system
+128.2.13.133       //IP address of master node in map-reduce facility
+33150              //port number of master node in map-reduce facility
+2                  //quantity of participant node(s) in map-reduce facility
+128.2.13.134       //IP address of participant node(s) in map-reduce facility
+33160              //port number of participant node(s) in map-reduce facility
+128.2.13.161       //IP address of participant node(s) in map-reduce facility
+33160              //port number of participant node(s) in map-reduce facility
+
+
+
+
+
+
+
+//please note that NameNode, DataNode(s), master node, participant node(s) have to get different port numbers; all DataNodes' port number must be the same;all participant nodes's port number must be the same.  
+//please keep all data in the same order and each type of data in different line, data and comments are separated be space instead of tab, when need to change or add parameters,please do not change the overall format of this file. 
+//please note that quantity of participant node(s), quantity of master node(s) must consistent with given IP & port paris.

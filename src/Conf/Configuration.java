@@ -10,9 +10,9 @@ import Utility.StringComparator;
 
 @SuppressWarnings("rawtypes")
 public class Configuration implements Serializable {
-	
+
 	private static final long serialVersionUID = 12L;
-	
+
 	private Class mapperClass = WordCount.Map.class;
 	private Class reducerClass = WordCount.Reduce.class;
 	private Class combinerClass = WordCount.Reduce.class;
@@ -24,9 +24,10 @@ public class Configuration implements Serializable {
 	private Class outputValueClass = String.class;
 	private int numReducers = 1;
 	private int numMapper = 4;
-	
+	private String inputFileName = "input.txt";
+
 	private Comparator comparator = new StringComparator();
-	
+
 	/**
 	 * @return the mapperClass
 	 */
@@ -135,11 +136,11 @@ public class Configuration implements Serializable {
 	public void setOutputValueClass(Class outputValueClass) {
 		this.outputValueClass = outputValueClass;
 	}
-	
+
 	public Comparator getComparator() {
 		return comparator;
 	}
-	
+
 	public void setComparator(Comparator comparator) {
 		this.comparator = comparator;
 	}
@@ -160,5 +161,17 @@ public class Configuration implements Serializable {
 	}
 	public void setNumMapper(int numMapper) {
 		this.numMapper = numMapper;
+	}
+	/**
+	 * @return the inputFileName
+	 */
+	public String getInputFileName() {
+		return inputFileName;
+	}
+	/**
+	 * @param inputFileName the inputFileName to set
+	 */
+	public void setInputFileName(String inputFileName) {
+		this.inputFileName = inputFileName;
 	}
 }

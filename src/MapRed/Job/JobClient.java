@@ -1,5 +1,7 @@
 package MapRed.Job;
 
+import java.text.NumberFormat;
+
 import Utility.Communication;
 import Utility.Message;
 import Utility.Utility;
@@ -12,6 +14,10 @@ public class JobClient {
 	private static int nodeDone = 0;
 
 	public static void runJob(Configuration conf) {
+		NumberFormat format = NumberFormat.getPercentInstance();
+		format.setMinimumFractionDigits(1);
+		
+		Utility.configure();
 		jobTrackerComm = new Communication(Utility.JOBTRACKER.ipAddress,
 				Utility.JOBTRACKER.port);
 		System.out.println("create the mapreduce job...");
@@ -24,13 +30,13 @@ public class JobClient {
 		while (isRunning) {
 			msg = jobTrackerComm.readMessage();
 			if (msg.getMsgType() == Utility.MAPPERDONE) {
-				System.out.printf("completed mapper job:\\% %d  ", ++nodeDone
-						/ Utility.TASKTRACKERS.size());
-				if(nodeDone == Utility.MAPPERDONE) nodeDone = 0;
+				System.out.print("Completed mapper job: ");
+				System.out.println(format.format((double) ++nodeDone / (double) Utility.TASKTRACKERS.size()));
+				if(nodeDone == Utility.TASKTRACKERS.size()) nodeDone = 0;
 			}else if(msg.getMsgType() == Utility.REDUCERDONE){
-				System.out.printf("completed reducer job:\\% %d  ", ++nodeDone
-						/ Utility.TASKTRACKERS.size());
-				if(nodeDone == Utility.MAPPERDONE) isRunning = false;
+				System.out.print("Completed reducer job: ");
+				System.out.println(format.format((double) ++nodeDone / (double) Utility.TASKTRACKERS.size()));
+				if(nodeDone == Utility.TASKTRACKERS.size()) isRunning = false;
 			}
 		}
 	}

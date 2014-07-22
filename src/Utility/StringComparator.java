@@ -7,7 +7,7 @@ public class StringComparator implements Comparator<String>, Serializable{
 
 	private static final long serialVersionUID = 13L;
 
-//	@Override
+	@Override
 	public int compare(String o1, String o2) {
 		int ret = o1.compareTo(o2);
 		if (ret > 0) {

@@ -1,5 +1,6 @@
 package MapRed.Job;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.io.File;
 
 import Conf.Configuration;
+import JZFS.JZFSFileOutputStream;
 import MapRed.Input.FileSplit;
 import MapRed.Input.IInputSplit;
 import MapRed.Map.MapBasicContext;
@@ -28,6 +30,7 @@ public class JobTracker {
 	};
 
 	private static class TaskTrackerContext {
+		@SuppressWarnings("unused")
 		public Map<String, TaskTrackerJobStatus> jobStatuses = new HashMap<String, TaskTrackerJobStatus>();
 		public Map<String, List<MapBasicContext>> jobMappers = new HashMap<String, List<MapBasicContext>>();
 		public Map<String, List<ReduceBasicContext>> jobReducers = new HashMap<String, List<ReduceBasicContext>>();
@@ -51,7 +54,8 @@ public class JobTracker {
 
 		/* Prepare job context */
 		JobID jobID = generateJobID();
-		comms.put(String.valueOf(jobID.getJobID()), comm);
+		comms.put(jobID.getID(), comm);
+		completedMapNodes.put(jobID.getID(), 0);
 		
 		JobContext jobContext = new JobContext(conf, jobID);
 		jobContexts.put(jobID.getID(), jobContext);
@@ -77,30 +81,63 @@ public class JobTracker {
 			taskTrackerComms.get(i).sendMessage(msg);
 		}
 	}
+	
+	private static String putInputFile(String inputFileName) {
+		try {
+			
+			String outputFileName = Utility.InputFolder + inputFileName;
+			byte[] data = new byte[1024];
+			int bytes = 0;
+			
+			FileInputStream inStream = new FileInputStream(new File(inputFileName));
+			JZFSFileOutputStream outputStream = new JZFSFileOutputStream(outputFileName);
+			
+			while ((bytes = inStream.read(data)) != -1) {
+				outputStream.write(data, 0, bytes);
+			}
+			
+			inStream.close();
+			outputStream.close();
+			
+			System.out.println("Finish adding input file.");
+			return outputFileName;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	private static void generateTrackerContext(Configuration conf, JobID jobID) {
+		
+		int totalNumMappers = taskTrackerComms.size() * conf.getNumMapper();
+		int offsetDelta = 0;
+		
 		for (int i = 0; i < taskTrackerComms.size(); i++) {
 			TaskTrackerContext context = taskTrackerContexts.get(i);
 
 			List<MapBasicContext> mapTaskList = new ArrayList<MapBasicContext>();
 			List<ReduceBasicContext> reduceTaskList = new ArrayList<ReduceBasicContext>();
 
-			File file = new File(Utility.FILENAME);
-			JZFile fileJZ = new JZFile(JZFile.LocalFileSystem,
-					Utility.FILENAME, file.length());
-			int delta = (int) (file.length() / conf.getNumMapper());
+			String inputFile = conf.getInputFileName();
+			File file = new File(inputFile);
+			
+			String FSInputFile = putInputFile(inputFile);
+			JZFile fileJZ = new JZFile(JZFile.JZFileSystem,
+					FSInputFile, file.length());
+			int delta = (int) (file.length() / totalNumMappers);
 
 			for (int j = 0; j < conf.getNumMapper(); j++) {
 				TaskID taskid = new TaskID(jobID, TaskType.MAPPER_T, j, 0);
 				IInputSplit split;
-				if (j == conf.getNumMapper() - 1) {
-					split = new FileSplit(fileJZ, j * delta, file.length());
+				if ((j == conf.getNumMapper() - 1) && (i == taskTrackerComms.size() - 1)) {
+					split = new FileSplit(fileJZ, offsetDelta, file.length() - offsetDelta);
 				} else {
-					split = new FileSplit(fileJZ, j * delta, ((j + 1) * delta));
+					split = new FileSplit(fileJZ, offsetDelta, delta);
 				}
 				MapBasicContext basicContext = new MapBasicContext(conf,
 						taskid, split);
 				mapTaskList.add(basicContext);
+				offsetDelta += delta;
 			}
 			context.jobMappers.put(jobID.getID(), mapTaskList);
 
@@ -139,24 +176,23 @@ public class JobTracker {
 						Communication comm = new Communication(socket);
 						Message msg = comm.readMessage();
 						Communication clientCmm;
-						int trackerID = msg.getTaskTrackerID();
 						switch (msg.getMsgType()) {
 						case Utility.MAPPERDONE:
 							System.out
 									.println("Received mappers done message from task tracker["
 											+ msg.getTaskTrackerID()
-											+ "] for job[" + msg.getJobID());
-							System.out.println("Now run reducers for job["
-									+ msg.getJobID() + "].");
+											+ "] for job[" + msg.getJobID() + "].");
 							int maped = completedMapNodes.get(msg.getJobID());
-							completedMapNodes.put(msg.getJobID(), maped++);
-							clientCmm = comms.get(trackerID);
+							completedMapNodes.put(msg.getJobID(), ++maped);
+							clientCmm = comms.get(msg.getJobID());
 							clientCmm.sendMessage(msg);
 							if(maped == Utility.TASKTRACKERS.size()){
+								String jobID = msg.getJobID();
+								System.out.println("Now run reducers for job["
+										+ jobID + "].");
 								for (int i = 0; i < taskTrackerComms.size(); i++) {
 									List<ReduceBasicContext> reduceTaskList = taskTrackerContexts
-											.get(i).jobReducers.get(msg
-											.getJobID());
+											.get(i).jobReducers.get(jobID);
 									msg = new Message(Utility.RUNREDUCER,
 											reduceTaskList);
 									taskTrackerComms.get(i).sendMessage(msg);
@@ -168,8 +204,7 @@ public class JobTracker {
 							submitJob(msg.getConfiguration(), comm);
 							break;
 						case Utility.REDUCERDONE:
-							clientCmm = comms.get(trackerID);
-							msg = new Message(Utility.RUNREDUCER);
+							clientCmm = comms.get(msg.getJobID());
 							clientCmm.sendMessage(msg);
 							break;
 						case Utility.TASKTRACKERHEARTBEAT:
@@ -194,10 +229,10 @@ public class JobTracker {
 
 		try {
 			server = new ServerSocket(Utility.JobTrackerPort);
-			Socket socket = server.accept();
-			Communication comm = new Communication(socket);
-			Message msg = comm.readMessage();
 			while (taskTrackerComms.size() < Utility.TASKTRACKERS.size()) {
+				Socket socket = server.accept();
+				Communication comm = new Communication(socket);
+				Message msg = comm.readMessage();
 				if (msg.getMsgType() == Utility.TASKTRACKERREG) {
 					System.out
 							.println("Received registration request from node ["

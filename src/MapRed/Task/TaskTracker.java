@@ -42,10 +42,10 @@ public class TaskTracker {
 			new HashMap<String, List<Mapper.Context>>();
 	private static Map<String, List<Reducer.Context>> jobReducers = 
 			new HashMap<String, List<Reducer.Context>>();
-	
+
 	private static int numMappers;
 	private static int numReducers;
-	
+
 	public static void main(String[] args) {
 		/* Set up configuration */
 		Utility.configure();
@@ -89,7 +89,7 @@ public class TaskTracker {
 					launchMappers(jobContext, mapBasicContexts);
 				}
 			}
-			
+
 			else if (msg.getMsgType() == Utility.RUNREDUCER) {
 				System.out.println("Received RUNREDUCER command from job tracker.");
 				List<ReduceBasicContext> reduceBasicContexts = msg.getReduceContexts();
@@ -100,20 +100,13 @@ public class TaskTracker {
 					launchReducers(jobContext, reduceBasicContexts);
 				}
 			}
-			
+
 			else if (msg.getMsgType() == Utility.CLOSE) {
 				isRunning = false;
 			}
 		}
 
 		jobTrackerComm.close();
-		/*
-		
-
-		launchMappers(jobContext, mapTaskList);
-		partition(jobContext);
-		launchReducers(jobContext, reduceTaskList);
-		*/
 	}
 
 
@@ -127,19 +120,12 @@ public class TaskTracker {
 			Configuration conf = jobContext.getConfiguration();
 			Comparator comparator = conf.getComparator();
 
-			/*
-			Class inputKeyClass = conf.getInputKeyClass();
-			Class inputValueClass = conf.getInputValueClass();
-			Class outputKeyClass = conf.getOutputKeyClass();
-			Class outputValueClass = conf.getOutputValueClass();
-			 */
-
 			Class mapperClass = conf.getMapperClass();
 			Class inputFormatClass = conf.getInputFormatClass();
 
 			Constructor inputFormatConst = inputFormatClass.getConstructor(new Class[]{});
-			IInputFormat<Long, String> inputFormat = 
-					(IInputFormat<Long, String>) inputFormatConst.newInstance(new Object[] {});
+			IInputFormat<Object, Object> inputFormat = 
+					(IInputFormat<Object, Object>) inputFormatConst.newInstance(new Object[] {});
 			Constructor mapperConst = mapperClass.getConstructor(new Class[]{});
 
 			for (int i = 0; i < taskList.size(); i++) {
@@ -147,18 +133,18 @@ public class TaskTracker {
 				MapBasicContext basicMap = taskList.get(i);
 
 				IInputSplit split = basicMap.getInputSplit();
-				IRecordReader<Long, String> reader = inputFormat.createIRecordReader(split, null);
+				IRecordReader<Object, Object> reader = inputFormat.createIRecordReader(split, null);
 
 				String fileName = Utility.MapperOutputNameBase + 
 						String.valueOf(basicMap.getTaskID().getTaskID()) + Utility.MiddleOutputFileSuffix;
 				JZSequenceFile outputFile = new JZSequenceFile(JZFile.LocalFileSystem, fileName, 0, 0);
-				IRecordWriter<String, Integer> writer = 
-						new SequenceFileRecordSortedWriter(outputFile, comparator, basicMap.getTaskID().getID());
+				IRecordWriter<Object, Object> writer = 
+						new SequenceFileRecordSortedWriter<Object, Object>(outputFile, comparator, basicMap.getTaskID().getID());
 
-				final Mapper<Long, String, String, Integer> mapper = 
-						(Mapper<Long, String, String, Integer>) mapperConst.newInstance(new Object[]{});
+				final Mapper<Object, Object, Object, Object> mapper = 
+						(Mapper<Object, Object, Object, Object>) mapperConst.newInstance(new Object[]{});
 
-				final Mapper<Long, String, String, Integer>.Context context = 
+				final Mapper<Object, Object, Object, Object>.Context context = 
 						mapper.new Context(conf, basicMap.getTaskID(), reader, writer, null, null, split);
 
 				if (jobMappers.containsKey(jobID)) {
@@ -170,9 +156,9 @@ public class TaskTracker {
 					mapContexts.add(context);
 					jobMappers.put(jobID, mapContexts);
 				}
-				
+
 				new Thread(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						try {
@@ -209,8 +195,8 @@ public class TaskTracker {
 		Comparator comparator = conf.getComparator();
 		int numReducers = conf.getNumReducers();
 
-		HashPartitioner<String, List<Integer>> partitioner = 
-				new HashPartitioner<String, List<Integer>>();
+		HashPartitioner<Object, List<Object>> partitioner = 
+				new HashPartitioner<Object, List<Object>>();
 
 		List<String> files = new ArrayList<String>();
 
@@ -239,8 +225,8 @@ public class TaskTracker {
 			Class outputFormatClass = conf.getOutputFormatClass();
 
 			Constructor outputFormatConst = outputFormatClass.getConstructor(new Class[]{});
-			IOutputFormat<String, String> outputFormat = 
-					(IOutputFormat<String, String>) outputFormatConst.newInstance(new Object[] {});
+			IOutputFormat<Object, Object> outputFormat = 
+					(IOutputFormat<Object, Object>) outputFormatConst.newInstance(new Object[] {});
 			Constructor reducerConst = reducerClass.getConstructor(new Class[]{});
 
 			for (int i = 0; i < taskList.size(); i++) {
@@ -264,19 +250,19 @@ public class TaskTracker {
 
 				JZSequenceFile.staticMerge(files, reduceInputFile, comparator);
 
-				JZSequenceFile.Reader<String, List<Integer>> reader = 
-						new JZSequenceFile.Reader<String, List<Integer>>(reduceInputFile);
+				JZSequenceFile.Reader<Object, List<Object>> reader = 
+						new JZSequenceFile.Reader<Object, List<Object>>(reduceInputFile);
 
 				/* Get writer */
-				String outputFileName = Utility.LocalFStemp + taskID + "_output.dat";
+				String outputFileName = Utility.OutputFolder + taskID + "_output.dat";
 				JZSequenceFile reduceOutputFile = 
-						new JZSequenceFile(JZFile.LocalFileSystem, outputFileName, 0, 0);
-				IRecordWriter<String, String> writer = outputFormat.getRecordWriter(reduceOutputFile, basicContext);
+						new JZSequenceFile(JZFile.JZFileSystem, outputFileName, 0, 0);
+				IRecordWriter<Object, Object> writer = outputFormat.getRecordWriter(reduceOutputFile, basicContext);
 
 				/* Create reducer */
-				final Reducer<String, List<Integer>, String, String> reducer = 
-						(Reducer<String, List<Integer>, String, String>) reducerConst.newInstance(new Object[]{});
-				final Reducer<String, List<Integer>, String, String>.Context context = 
+				final Reducer<Object, List<Object>, Object, Object> reducer = 
+						(Reducer<Object, List<Object>, Object, Object>) reducerConst.newInstance(new Object[]{});
+				final Reducer<Object, List<Object>, Object, Object>.Context context = 
 						reducer.new Context(conf, basicContext.getTaskID(), reader, writer, null, null);
 
 				/* Add it to the hash map */
@@ -289,9 +275,9 @@ public class TaskTracker {
 					reduceContexts.add(context);
 					jobReducers.put(jobID, reduceContexts);
 				}
-				
+
 				new Thread(new Runnable() {
-					
+
 					@Override
 					public void run() {
 						try {
@@ -321,12 +307,14 @@ public class TaskTracker {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private synchronized static void updateMapperStatus(Mapper.Context context) {
-		String jobID = context.getJobID().getID();
-		if (jobMappers.get(jobID).size() == numMappers) {
-			try {
-				context.setTaskStatus(TaskStatus.FINISHED);
+		try {
+			System.out.println("Mapper[" + context.getTaskID().getID() + "] has finished.");
+			context.setTaskStatus(TaskStatus.FINISHED);
+			String jobID = context.getJobID().getID();
+			if (jobMappers.get(jobID).size() == numMappers) {
+
 				List<Mapper.Context> mapContexts = jobMappers.get(jobID);
 				boolean finished = true;
 				for (int i = 0; i < mapContexts.size(); i++) {
@@ -344,12 +332,12 @@ public class TaskTracker {
 					comm.sendMessage(msg);
 					comm.close();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
-	
+
 	private synchronized static void updateReducerStatus(Reducer.Context context) {
 		String jobID = context.getJobID().getID();
 		if (jobReducers.get(jobID).size() == numReducers) {

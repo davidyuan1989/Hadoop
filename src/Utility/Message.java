@@ -23,30 +23,23 @@ public class Message implements Serializable {
 	private int type = 0;		/* Type of the message */
 
 	private String fileName;	/* Name of the file to read */
-	
+
 	private Machine datanodeMachine;
 
 	private byte[] data;		/* Array of data that read */
 	private int size;			/* Size of the data that read */
-	
+
 	private long datanodeSpaceUsed;
 	private String nodeID;
-	
+
 	private int taskTrackerID;
 	private JobContext jobContext;
 	private List<MapBasicContext> mapContexts;
 	private List<ReduceBasicContext> reduceContexts;
-	private Configuration conf;
-	
-	private String jobID;
 
-	public Message(int type, Configuration conf){
-		if (type == Utility.CONF) {
-			this.type = type;
-			this.conf = conf;
-		}
-	}
-	
+	private String jobID;
+	private Configuration conf;
+
 	public Message(int type) {
 
 		if (type == Utility.ACK || type == Utility.TASKTRACKERREG || type == Utility.NEWJOBACK) {
@@ -55,6 +48,13 @@ public class Message implements Serializable {
 
 		else {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
+		}
+	}
+
+	public Message(int type, Configuration conf){
+		if (type == Utility.CONF) {
+			this.type = type;
+			this.conf = conf;
 		}
 	}
 
@@ -69,7 +69,7 @@ public class Message implements Serializable {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
 		}
 	}
-	
+
 	public Message(int type, int taskTrackerID) {
 
 		if (type == Utility.REGACK) {
@@ -81,7 +81,7 @@ public class Message implements Serializable {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
 		}
 	}
-	
+
 	public Message(int type, JobContext jobContext) {
 
 		if (type == Utility.NEWJOB) {
@@ -93,7 +93,7 @@ public class Message implements Serializable {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Message(int type, List<?> contexts) {
 
@@ -101,7 +101,7 @@ public class Message implements Serializable {
 			this.type = type;
 			this.mapContexts = (List<MapBasicContext>) contexts;
 		}
-		
+
 		else if (type == Utility.RUNREDUCER) {
 			this.type = type;
 			this.reduceContexts = (List<ReduceBasicContext>) contexts;
@@ -111,7 +111,7 @@ public class Message implements Serializable {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
 		}
 	}
-	
+
 	public Message(int type, Machine machine) {
 
 		if (type == Utility.FILELOCATION) {
@@ -136,7 +136,7 @@ public class Message implements Serializable {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
 		}
 	}
-	
+
 	public Message(int type, byte[] data, int size) {
 
 		if (type == Utility.DATAREAD) {
@@ -149,7 +149,7 @@ public class Message implements Serializable {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
 		}
 	}
-	
+
 	public Message(int type, String fileName, byte[] data, int size) {
 
 		if (type == Utility.WRITEFILE) {
@@ -163,7 +163,7 @@ public class Message implements Serializable {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
 		}
 	}
-	
+
 	public Message(int type, long datanodeSpaceUsed, String nodeID) {
 
 		if (type == Utility.DATANODEHEARTBEAT) {
@@ -176,7 +176,7 @@ public class Message implements Serializable {
 			System.out.println("Message type and arguments do not match! Message requested: " + type);
 		}
 	}
-	
+
 	public int getMsgType() {
 		return type;
 	}
@@ -184,7 +184,7 @@ public class Message implements Serializable {
 	public String getFileName() {
 		return fileName;
 	}
-	
+
 	public Machine getDataNodeMachine() {
 		return datanodeMachine;
 	}
@@ -196,35 +196,35 @@ public class Message implements Serializable {
 	public int getDataSize() {
 		return size;
 	}
-	
+
 	public long getDataNodeSpaceUsed() {
 		return datanodeSpaceUsed;
 	}
-	
+
 	public String getNodeID() {
 		return nodeID;
 	}
-	
+
 	public int getTaskTrackerID() {
 		return taskTrackerID;
 	}
-	
+
 	public JobContext getJobContext() {
 		return jobContext;
 	}
-	
+
 	public List<MapBasicContext> getMapContexts() {
 		return mapContexts;
 	}
-	
+
 	public List<ReduceBasicContext> getReduceContexts() {
 		return reduceContexts;
 	}
-	
+
 	public String getJobID() {
 		return jobID;
 	}
-	
+
 	public Configuration getConfiguration(){
 		return conf;
 	}
