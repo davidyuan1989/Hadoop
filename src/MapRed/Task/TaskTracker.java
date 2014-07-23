@@ -193,7 +193,7 @@ public class TaskTracker {
 		String jobID = jobContext.getJobID().getID();
 		Configuration conf = jobContext.getConfiguration();
 		Comparator comparator = conf.getComparator();
-		int numReducers = conf.getNumReducers();
+		int numReducers = conf.getNumReducers() * Utility.TASKTRACKERS.size();
 
 		HashPartitioner<Object, List<Object>> partitioner = 
 				new HashPartitioner<Object, List<Object>>();

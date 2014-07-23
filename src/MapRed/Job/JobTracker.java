@@ -142,7 +142,7 @@ public class JobTracker {
 			context.jobMappers.put(jobID.getID(), mapTaskList);
 
 			for (int j = 0; j < conf.getNumReducers(); j++) {
-				TaskID taskid = new TaskID(jobID, TaskType.REDUCER_T, j, 0);
+				TaskID taskid = new TaskID(jobID, TaskType.REDUCER_T, i*conf.getNumReducers() + j, 0);
 				ReduceBasicContext basicContext = new ReduceBasicContext(conf,
 						taskid);
 				reduceTaskList.add(basicContext);

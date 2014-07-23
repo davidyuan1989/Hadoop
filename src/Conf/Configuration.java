@@ -22,8 +22,8 @@ public class Configuration implements Serializable {
 	private Class inputValueClass = String.class;
 	private Class outputKeyClass = String.class;
 	private Class outputValueClass = String.class;
-	private int numReducers = 1;
-	private int numMapper = 4;
+	private int numReducers = 1;		/* Number of reducers on each node */
+	private int numMapper = 16;			/* Number of mappers on each node */
 	private String inputFileName = "input.txt";
 
 	private Comparator comparator = new StringComparator();
